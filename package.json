@@ -1,0 +1,42 @@
+{
+  "name": "cli-summary-for-ynab",
+  "version": "1.0.0",
+  "description": "Get an overview of your YNAB budget information straight from your terminal.",
+  "main": "index.js",
+  "author": "Leslie Heinzen",
+  "license": "MIT",
+  "bin": {
+    "ynabsummary": "./dist/bin/ynabsummary.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leslie-heinzen/cli-summary-for-ynab.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "budget",
+    "command-line",
+    "cli"
+  ],
+  "bugs": {
+    "url": "https://github.com/leslie-heinzen/cli-summary-for-ynab/issues"
+  },
+  "homepage": "https://github.com/leslie-heinzen/cli-summary-for-ynab",
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@types/node": "^17.0.8",
+    "chalk": "^4.0.0",
+    "chalk-table": "^1.0.2",
+    "commander": "^5.1.0",
+    "fs-extra": "^9.0.0",
+    "glob": "^7.1.6",
+    "minimist": "^1.2.5",
+    "ora": "^4.0.4",
+    "typescript": "^4.5.4",
+    "ynab": "^1.25.0"
+  }
+}

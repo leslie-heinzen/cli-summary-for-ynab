@@ -31,7 +31,7 @@ review your budget at a glance.
 Options:
   -t, --token <ynab-token>     token used to authenticate w/YNAB if a YNAB_TOKEN env variable is not set. (default: "")
   -b, --budget-id <budget-id>  the budget id. (default: "last-used")
-  -m, --month <month>          get results for a specific months (YYYY-MM-DD) (default: "current")
+  -m, --month <month>          get results for a specific month. (YYYY-MM-DD) (default: "current")
   -h, --help                   display help for command
 ```
 

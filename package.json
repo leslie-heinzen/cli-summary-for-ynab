@@ -1,8 +1,7 @@
 {
   "name": "cli-summary-for-ynab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get an overview of your YNAB budget information straight from your terminal.",
-  "main": "index.js",
   "author": "Leslie Heinzen",
   "license": "MIT",
   "bin": {

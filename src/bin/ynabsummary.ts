@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command, program } from "commander";
 import { getBudgetData, renderTable } from "../lib/index";
 import chalk from "chalk";

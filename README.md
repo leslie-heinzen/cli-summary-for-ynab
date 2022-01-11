@@ -6,14 +6,14 @@ Get an overview of your YNAB budget information straight from your terminal.
 
 ## Usage
 ```
-npx ynabsummary budget -t <your-ynab-personal-access-token>
+npx cli-summary-for-ynab budget -t <your-ynab-personal-access-token>
 ```
 
 Or
 
 ```
 export YNAB_TOKEN=<your-ynab-personal-access-token>
-yarn global add ynabsummary
+yarn global add cli-summary-for-ynab
 
 ynabsummary budget
 ```

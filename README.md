@@ -2,7 +2,7 @@
 
 # CLI Summary for YNAB
 
-Get an overview of your YNAB budget information straight from your terminal.
+Get an overview of your YNAB budget information straight from the command line.
 
 <img width="375" alt="image" src="https://user-images.githubusercontent.com/18588917/148914272-3277b193-43aa-4387-bc86-e1a5b88d56ff.png">
 

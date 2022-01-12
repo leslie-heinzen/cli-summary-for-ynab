@@ -1,7 +1,10 @@
 import { API, Category } from "ynab";
 import chalkTable from "chalk-table";
+import { groupBy, truncate } from "./utils";
+import { YNABError } from "./types/types";
 
 export async function getBudgetData(
+  commandName: string,
   opts: Record<string, string>
 ): Promise<{ data?: Record<string, any>; error?: string }> {
   const token = opts.token || process.env.YNAB_TOKEN;
@@ -15,14 +18,36 @@ export async function getBudgetData(
 
   const client = ynabApiWrapper(token);
 
-  const data = await client.getCategoriesByMonth(opts.budgetId, opts.month);
-  return { data: data };
+  try {
+    if (commandName == "transactions") {
+      const data = await client.getTransactions(opts);
+      return { data: data };
+    }
+  
+    if (commandName == "budget") {
+      const data = await client.getCategoriesByMonth(opts.budgetId, opts.month);
+      return { data: data };
+    }
+  } catch (e) {
+    const err = e as YNABError;
+    if (err.detail) {
+      return { error: err.detail }
+    }
+
+    return { error: "Error fetching data from YNAB."}
+  }
+
+
+  return { error: "unrecognized command." };
 }
 
-export async function renderTable(data: Record<string, any>, columns: Record<string, any>[]) {
+export async function renderTable(
+  data: Record<string, any>,
+  columns: Record<string, any>[]
+) {
   const options = {
     leftPad: 2,
-    columns
+    columns,
   };
 
   const tables = Object.values(data).map((d) => {
@@ -49,18 +74,37 @@ const ynabApiWrapper = function (token: string) {
     return categoriesByGroup;
   }
 
+  async function getTransactions(opts: Record<string, string>) {
+    const res = await _client.transactions.getTransactions(
+      opts.budgetId,
+      opts.date
+    );
+    let transactions = res.data.transactions;
+
+    if (opts.account) {
+      transactions = transactions.filter((t) => t.account_name == opts.account);
+    }
+
+    if (opts.category) {
+      transactions = transactions.filter(
+        (t) => t.category_name == opts.category
+      );
+    }
+
+    transactions = transactions.map((t) => {
+      return {
+        ...t,
+        payee_name: truncate(t.payee_name, 25),
+        category_name: truncate(t.category_name, 25),
+      };
+    });
+
+    transactions.reverse();
+    return transactions;
+  }
+
   return Object.freeze({
     getCategoriesByMonth,
+    getTransactions,
   });
-};
-
-var groupBy = function <T extends Record<string, any>>(data: T[], key: string) {
-  const res = data.reduce((storage, item) => {
-    var group = item[key];
-    storage[group] = storage[group] || [];
-    storage[group].push(item);
-    return storage;
-  }, {} as Record<string, T>);
-
-  return res;
 };

@@ -3,6 +3,7 @@
 import { Command, program } from "commander";
 import { getBudgetData, renderTable } from "../lib/index";
 import chalk from "chalk";
+import { cleanArgs } from "../lib/utils";
 
 program
   .version(`cli-summary-for-ynab ${process.env.npm_package_version}`)
@@ -28,10 +29,10 @@ program
   )
   .action(async (cmd: Command) => {
     const options = cleanArgs(cmd);
-    const res = await getBudgetData(options);
+    const res = await getBudgetData(cmd._name, options);
 
     if (res.error) {
-      throw new Error();
+      throw new Error(res.error);
     }
 
     if (res.data) {
@@ -44,20 +45,46 @@ program
     }
   });
 
-program.parseAsync(process.argv);
+program
+  .command("transactions")
+  .description("review your transactions.")
+  .option(
+    "-t, --token <ynab-token>",
+    "token used to authenticate w/YNAB if a YNAB_TOKEN env variable is not set.",
+    ""
+  )
+  .option("-b, --budget-id <budget-id>", "the budget id.", "last-used")
+  .option(
+    "-d, --date <start-date>",
+    "the start date for the returned transactions (YYYY-MM-DD)."
+  )
+  .option(
+    "-a, --account <account-name>",
+    "get results for a single account."
+  )
+  .option(
+    "-c, --category <category>",
+    "filter the results by a single category."
+  )
+  .action(async (cmd: Command) => {
+    const options = cleanArgs(cmd);
+    console.log(cmd._name);
+    const res = await getBudgetData(cmd._name, options);
 
-function camelize(str: string) {
-  return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ""));
-}
+    if (res.error) {
+      throw new Error(res.error);
+    }
 
-function cleanArgs(cmd: Command): Record<string, string> {
-  const args: { [key: string]: string } = {};
-  cmd.options.forEach((o: any) => {
-    const key = camelize(o.long.replace(/^--/, ""));
-    if (typeof cmd[key] !== "function" && typeof cmd[key] !== "undefined") {
-      args[key] = cmd[key];
+    if (res.data) {
+      await renderTable({ data: res.data }, [
+        { field: "date", name: chalk.cyan("Date") },
+        { field: "payee_name", name: chalk.magenta("Payee") },
+        { field: "category_name", name: chalk.green("Category") },
+        { field: "amount", name: chalk.yellow("In/Out") },
+        { field: "cleared", name: chalk.green("Cleared") },
+      ]);
     }
   });
 
-  return args;
-}
+
+program.parseAsync(process.argv).catch(console.error);

@@ -24,7 +24,7 @@ Or
 
 ### budget
 ```
-Usage: ynabr budget [options]
+Usage: ynabsummary budget [options]
 
 review your budget at a glance.
 

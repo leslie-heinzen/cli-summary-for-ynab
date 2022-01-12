@@ -2,6 +2,7 @@ import { API, Category } from "ynab";
 import chalkTable from "chalk-table";
 import { groupBy, truncate } from "./utils";
 import { YNABError } from "./types/types";
+import { opts } from "commander";
 
 export async function getBudgetData(
   commandName: string,
@@ -23,7 +24,12 @@ export async function getBudgetData(
       const data = await client.getTransactions(opts);
       return { data: data };
     }
-  
+
+    if (commandName == "accounts") {
+      const data = await client.getAccounts(opts);
+      return { data: data };
+    }
+
     if (commandName == "budget") {
       const data = await client.getCategoriesByMonth(opts.budgetId, opts.month);
       return { data: data };
@@ -31,12 +37,11 @@ export async function getBudgetData(
   } catch (e) {
     const err = e as YNABError;
     if (err.detail) {
-      return { error: err.detail }
+      return { error: err.detail };
     }
 
-    return { error: "Error fetching data from YNAB."}
+    return { error: "Error fetching data from YNAB." };
   }
-
 
   return { error: "unrecognized command." };
 }
@@ -74,6 +79,22 @@ const ynabApiWrapper = function (token: string) {
     return categoriesByGroup;
   }
 
+  async function getAccounts(opts: Record<string, string>) {
+    const res = await _client.accounts.getAccounts(opts.budgetId);
+
+    let accounts = res.data.accounts;
+
+    if (!opts.closed) {
+      accounts = accounts.filter((a) => a.closed == false);
+    }
+
+    if (!opts.offBudget) {
+      accounts = accounts.filter((a) => a.on_budget == true);
+    }
+
+    return accounts;
+  }
+
   async function getTransactions(opts: Record<string, string>) {
     const res = await _client.transactions.getTransactions(
       opts.budgetId,
@@ -105,6 +126,7 @@ const ynabApiWrapper = function (token: string) {
 
   return Object.freeze({
     getCategoriesByMonth,
+    getAccounts,
     getTransactions,
   });
 };

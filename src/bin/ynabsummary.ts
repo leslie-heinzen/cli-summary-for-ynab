@@ -46,6 +46,35 @@ program
   });
 
 program
+  .command("accounts")
+  .description("review your budget accounts.")
+  .option(
+    "-t, --token <ynab-token>",
+    "token used to authenticate w/YNAB if a YNAB_TOKEN env variable is not set.",
+    ""
+  )
+  .option("-b, --budget-id <budget-id>", "the budget id.", "last-used")
+  .option("-c, --closed", "include closed accounts.")
+  .option("-o, --off-budget", "include off-budget accounts.")
+  .action(async (cmd: Command) => {
+    const options = cleanArgs(cmd);
+    const res = await getBudgetData(cmd._name, options);
+
+    if (res.error) {
+      throw new Error(res.error);
+    }
+
+    if (res.data) {
+      await renderTable({ data: res.data }, [
+        { field: "name", name: chalk.cyan("Name") },
+        { field: "type", name: chalk.magenta("Type") },
+        { field: "balance", name: chalk.blue("Balance") },
+        { field: "direct_import_linked", name: chalk.yellow("Linked") },
+      ]);
+    }
+  });
+
+program
   .command("transactions")
   .description("review your transactions.")
   .option(
@@ -58,10 +87,7 @@ program
     "-d, --date <start-date>",
     "the start date for the returned transactions (YYYY-MM-DD)."
   )
-  .option(
-    "-a, --account <account-name>",
-    "get results for a single account."
-  )
+  .option("-a, --account <account-name>", "get results for a single account.")
   .option(
     "-c, --category <category>",
     "filter the results by a single category."
@@ -79,12 +105,11 @@ program
       await renderTable({ data: res.data }, [
         { field: "date", name: chalk.cyan("Date") },
         { field: "payee_name", name: chalk.magenta("Payee") },
-        { field: "category_name", name: chalk.green("Category") },
+        { field: "category_name", name: chalk.blue("Category") },
         { field: "amount", name: chalk.yellow("In/Out") },
         { field: "cleared", name: chalk.green("Cleared") },
       ]);
     }
   });
-
 
 program.parseAsync(process.argv).catch(console.error);

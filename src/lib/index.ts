@@ -77,7 +77,7 @@ const ynabApiWrapper = function (token: string) {
     const res = await _client.months.getBudgetMonth(budgetId, month);
     const format = await _getCurrencyFormat(budgetId);
 
-    const categories = parseCurrencyFields(
+    let categories = parseCurrencyFields(
       res.data.month.categories,
       ["budgeted", "activity", "balance"],
       format
@@ -87,12 +87,8 @@ const ynabApiWrapper = function (token: string) {
     const ignored = categories.find(
       (c) => c.name == "Inflow: Ready to Assign"
     )?.category_group_id;
-    const categoriesByGroup = groupBy(categories, "category_group_id");
-
-    if (ignored) {
-      delete categoriesByGroup[ignored];
-    }
-
+    const filtered = categories.filter(c => c.category_group_id != ignored);
+    const categoriesByGroup = groupBy(filtered, "category_group_id");
     return categoriesByGroup;
   }
 

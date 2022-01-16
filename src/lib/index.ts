@@ -1,6 +1,6 @@
 import { API, Category } from "ynab";
 import chalkTable from "chalk-table";
-import { groupBy, truncate } from "./utils";
+import { groupBy, parseCurrencyFields, truncate } from "./utils";
 import { YNABError } from "./types/types";
 import { opts } from "commander";
 
@@ -65,24 +65,41 @@ export async function renderTable(
 const ynabApiWrapper = function (token: string) {
   const _client = new API(token);
 
+  async function _getCurrencyFormat(budgetId: string) {
+    const res = await _client.budgets.getBudgetById(budgetId);
+    return res.data.budget.currency_format;
+  }
+
   async function getCategoriesByMonth(
     budgetId: string,
     month: string
   ): Promise<Record<string, Category>> {
     const res = await _client.months.getBudgetMonth(budgetId, month);
+    const format = await _getCurrencyFormat(budgetId);
 
-    const categoriesByGroup = groupBy(
+    const categories = parseCurrencyFields(
       res.data.month.categories,
-      "category_group_id"
+      ["budgeted", "activity", "balance"],
+      format
     );
+
+    // ignore internal master category; find by category name.
+    const ignored = categories.find(
+      (c) => c.name == "Inflow: Ready to Assign"
+    )?.category_group_id;
+    const categoriesByGroup = groupBy(categories, "category_group_id");
+
+    if (ignored) {
+      delete categoriesByGroup[ignored];
+    }
 
     return categoriesByGroup;
   }
 
   async function getAccounts(opts: Record<string, string>) {
     const res = await _client.accounts.getAccounts(opts.budgetId);
-
-    let accounts = res.data.accounts;
+    const format = await _getCurrencyFormat(opts.budgetId);
+    let accounts = parseCurrencyFields(res.data.accounts, ["balance"], format);
 
     if (!opts.closed) {
       accounts = accounts.filter((a) => a.closed == false);
@@ -100,7 +117,13 @@ const ynabApiWrapper = function (token: string) {
       opts.budgetId,
       opts.date
     );
-    let transactions = res.data.transactions;
+    const format = await _getCurrencyFormat(opts.budgetId);
+
+    let transactions = parseCurrencyFields(
+      res.data.transactions,
+      ["amount"],
+      format
+    );
 
     if (opts.account) {
       transactions = transactions.filter((t) => t.account_name == opts.account);

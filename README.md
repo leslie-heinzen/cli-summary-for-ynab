@@ -4,7 +4,7 @@
 
 Get an overview of your YNAB budget information straight from the command line.
 
-<img width="375" alt="image" src="https://user-images.githubusercontent.com/18588917/148914272-3277b193-43aa-4387-bc86-e1a5b88d56ff.png">
+<img width="382" alt="image" src="https://user-images.githubusercontent.com/18588917/149682779-68083710-57d1-40dc-b601-57f495ed6225.png">
 
 ## Usage
 ```sh

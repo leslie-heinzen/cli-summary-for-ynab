@@ -1,6 +1,6 @@
 {
   "name": "cli-summary-for-ynab",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Get an overview of your YNAB budget information straight from the command line.",
   "author": "Leslie Heinzen",
   "license": "MIT",
